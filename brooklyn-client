@@ -1,0 +1,39 @@
+#!/usr/bin/env node
+
+var program      = require("commander")
+  , bunyan       = require("bunyan")
+  , Client       = require("node-rest-client").Client;
+
+process.on("uncaughtException", function (err) {
+  console.log(err.message);
+});
+
+program
+  .version("0.0.1")
+  .option("--host [value]", "HTTP host")
+  .option("--port [value]", "HTTP port")
+  .option("--path [value]", "request URL ['/v1/applications']", "/v1/applications")
+  .option("--method [value]", "HTTP method")
+  .option("--data [value]", "TODO")
+  .option("--log-level [value]", "sets the log level [off]", "off")
+  .parse(process.argv);
+
+
+var log = bunyan.createLogger({
+  name: "brooklyn-client",
+  level: program.logLevel === "off" ? [] : program.logLevel
+});
+
+client = new Client();
+
+var host = program.host || "127.0.0.1";
+var port = program.port || "8081";
+var path = program.path || "/v1/applications";
+
+var requestAbsolutePath = "http://" + host + ":" + port + path;
+
+log.info("get:", requestAbsolutePath);
+client.get(requestAbsolutePath, function(data, response){
+  log.info(data);
+});
+
